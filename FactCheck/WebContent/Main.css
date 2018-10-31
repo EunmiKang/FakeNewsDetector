@@ -1,0 +1,116 @@
+@charset "UTF-8";
+
+@import url(http://fonts.googleapis.com/earlyaccess/hanna.css);
+
+body {
+	background-color: #e6e6ff;
+	font-family: 'Hanna', serif;
+}
+
+p {
+	text-align: center;
+}
+
+#p_title {
+	font-size: 30pt;
+	color: #000080;
+	font-weight: bold;
+	margin: 23px;
+}
+
+#p_title:hover {
+	cursor: default;
+}
+
+span {
+	font-size: 40pt;
+}
+
+
+/***************************** left, right *****************************/
+
+#div_left, #div_right {
+	margin: 20px;
+	margin-top: 0px;
+	width: 45%;
+	display: inline-grid;
+}
+
+#div_inputArea, #div_relatedArea {
+	background-color: #ccccff;
+	border-radius: 15px;
+}
+
+#p_input, #p_relatedInfo {
+	font-size: 17pt;
+	font-weight: bold;
+}
+
+#p_input:hover , #p_relatedInfo:hover, #div_result:hover {
+	cursor: default;
+}
+
+/******************************** left ********************************/
+
+#div_input {
+	text-align: center;
+}
+
+table {
+	width: 100%;
+}
+
+#div_inputArea {
+	height: 300px;
+	padding: 10px;
+}
+
+#txt_input {
+	width: 95%;
+	height: 240px;
+	background-color: #ccccff;
+	border: 0px;
+	padding: 10px;
+	font-family: 'Hanna', serif;
+	font-size: 15pt;
+}
+
+#btn_input {
+	width: 70px;
+    height: 30px;
+	background-color: #000080;
+	font-size: 15pt;
+	color: white;
+	border: 0px;
+    border-radius: 5px;
+}
+
+#btn_input:hover {
+	cursor: pointer;
+	background-color: white;
+	color: #000080;
+}
+
+#div_result {
+	text-align: center;
+    margin-top: 30pt;
+    font-size: 20pt;
+}
+
+/******************************** right ********************************/
+
+#div_relatedArea {
+	height: 400px;
+	padding: 20px;
+}
+
+#txt_related {
+	background-color: #ccccff;
+	font-size: 15pt;
+}
+
+#span_link {
+	background-color: #ccccff;
+	font-size: 10pt;
+	margin-left: 5px;
+}
