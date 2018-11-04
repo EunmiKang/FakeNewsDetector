@@ -17,13 +17,15 @@ public class Discriminator {
 	
 	@SuppressWarnings("unchecked")
 	public Result judgeTruth(String input, SentenceInfo sentenceInfo_input, ArrayList<SentenceInfo> relatedDatas) {
-		int result_flag = 0; // 0:판단유보, 1:사실, 2:거짓
+		int result_flag = 4; // 0:가짜뉴스가 아닙니다, 1:가짜뉴스가 아닐 확률이 높습니다, 2:가짜뉴스입니다, 3:가짜뉴스일 확률이 높습니다, 4:판단유보(관련데이터가 없을때)
 		Result result = new Result();
 		JSONArray relatedData_array = new JSONArray();
+		JSONArray[] result_array = new JSONArray[5];
 		ArrayList<SentenceInfo> selectedDatas = new ArrayList<>();
 		String[] postpositions_adv = { "에게", "에", "에서", "에게서", "한테", "으로", "로", "와", "과", "보다", "이", "가" }; // 부사격 조사
 		String[] postpositions_cmp = { "이", "가" }; // 보격 조사
 
+		/* 부사어, 보어에서 조사 제거 */
 		String input_adv = sentenceInfo_input.adv;
 		if (!input_adv.equals("null")) {
 			for (int i = 0; i < postpositions_adv.length; i++) {
@@ -48,200 +50,141 @@ public class Discriminator {
 		}
 
 		convertDate(sentenceInfo_input.tmp);
+		System.out.println("지현이가 한 날짜 변환 과연 !\n" + sentenceInfo_input.tmp);
 
 		/* 관련 문장들과 비교 */
-		if (!sentenceInfo_input.obj.equals("null") || !sentenceInfo_input.cmp.equals("null")) { // 목적어 or 보어 있음
-			for (int i = 0; i < relatedDatas.size(); i++) {
-				if ((!relatedDatas.get(i).obj.equals("null") && !sentenceInfo_input.obj.equals("null"))
-						|| (!relatedDatas.get(i).cmp.equals("null") && !input_cmp.equals("null"))) { // 목적어 or 보어 체크
-					if (relatedDatas.get(i).obj.equals(sentenceInfo_input.obj)
-							|| relatedDatas.get(i).cmp.contains(input_cmp)) { // 목적어 or 보어 같음
-						boolean continue_flag = true;
-						if (!relatedDatas.get(i).tmp.equals("null") && !sentenceInfo_input.tmp.equals("null")) { // 시간
-							// 비교
-							if (!relatedDatas.get(i).tmp.equals(sentenceInfo_input.tmp)) { // 시간 다름
-								continue_flag = false;
-							}
-						}
-						if (continue_flag && !relatedDatas.get(i).location.equals("null")
-								&& !sentenceInfo_input.location.equals("null")) { // 장소 비교
-							if (!relatedDatas.get(i).location.contains(sentenceInfo_input.location)) { // 장소 다름
-								continue_flag = false;
-							}
-						}
-						if (continue_flag && !relatedDatas.get(i).adv.equals("null") && !input_adv.equals("null")) { // 부사어
-																														// 비교
-							if (!relatedDatas.get(i).adv.contains(input_adv)) { // 부사어 다름
-								continue_flag = false;
-							}
-						}
-						if (continue_flag) { // 나머지 다 똑같!
-							if (!(relatedDatas.get(i).neg.equals("no") ^ sentenceInfo_input.neg.equals("no"))) { // true~~~~~
-								if (result_flag != 1) {
-									selectedDatas.clear();
-									relatedData_array.clear();
-								}
-								result_flag = 1;
-								selectedDatas.add(relatedDatas.get(i));
-								JSONObject jsonObject = new JSONObject();
-								jsonObject.put("sentence", relatedDatas.get(i).sentence);
-								jsonObject.put("link", relatedDatas.get(i).link);
-								relatedData_array.add(jsonObject);
-							} else { // 부정(neg)에 걸림!!
-								result_flag = 2;
-								selectedDatas.add(relatedDatas.get(i));
-								JSONObject jsonObject = new JSONObject();
-								jsonObject.put("sentence", relatedDatas.get(i).sentence);
-								jsonObject.put("link", relatedDatas.get(i).link);
-								relatedData_array.add(jsonObject);
-							}
-						} else { // 하나라도 다름!
-							if (result_flag != 1) {
-								result_flag = 2;
-								selectedDatas.add(relatedDatas.get(i));
-								JSONObject jsonObject = new JSONObject();
-								jsonObject.put("sentence", relatedDatas.get(i).sentence);
-								jsonObject.put("link", relatedDatas.get(i).link);
-								relatedData_array.add(jsonObject);
-							}
-						}
-					} else { // 목적어 or 보어 다름
-						if (result_flag != 1) {
-							boolean continue_flag = true;
-							if (!relatedDatas.get(i).tmp.equals("null") && !sentenceInfo_input.tmp.equals("null")) { // 시간
-																														// 비교
-								if (!relatedDatas.get(i).tmp.equals(sentenceInfo_input.tmp)) { // 시간 다름
-									continue_flag = false;
-								}
-							}
-							if (continue_flag && !relatedDatas.get(i).location.equals("null")
-									&& !sentenceInfo_input.location.equals("null")) {
-								if (!relatedDatas.get(i).location.equals(sentenceInfo_input.location)) { // 장소 다름
-									continue_flag = false;
-								}
-							}
-							if (continue_flag && !relatedDatas.get(i).adv.equals("null")
-									&& !sentenceInfo_input.adv.equals("null")) {
-								if (!relatedDatas.get(i).adv.equals(sentenceInfo_input.adv)) { // 부사어 다름
-									continue_flag = false;
-								}
-							}
-							if (continue_flag) { // 나머지 다 똑같!
-								if (!(relatedDatas.get(i).neg.equals("no") ^ sentenceInfo_input.neg.equals("no"))) { // false
-									result_flag = 2;
-									selectedDatas.add(relatedDatas.get(i));
-									JSONObject jsonObject = new JSONObject();
-									jsonObject.put("sentence", relatedDatas.get(i).sentence);
-									jsonObject.put("link", relatedDatas.get(i).link);
-									relatedData_array.add(jsonObject);
-								}
-							}
-						}
-					}
-				}
-			}
-		} else if (!input_adv.equals("null")) { // 목적어, 보어 없음 -> 부사어 확인
-			for (int i = 0; i < relatedDatas.size(); i++) {
-				if (!relatedDatas.get(i).adv.equals("null")) { // 부사어 체크
-					if (relatedDatas.get(i).adv.contains(input_adv)) { // 부사어 같음
-						boolean continue_flag = true;
-						if (!relatedDatas.get(i).tmp.equals("null") && !sentenceInfo_input.tmp.equals("null")) { // 시간
-																													// 비교
-							if (!relatedDatas.get(i).tmp.equals(sentenceInfo_input.tmp)) { // 시간 다름
-								continue_flag = false;
-							}
-						}
-						if (continue_flag && !relatedDatas.get(i).location.equals("null")
-								&& !sentenceInfo_input.location.equals("null")) { // 장소 비교
-							if (!relatedDatas.get(i).location.equals(sentenceInfo_input.location)) { // 장소 다름
-								continue_flag = false;
-							}
-						}
-						if (continue_flag) { // 나머지 다 똑같!
-							if (!(relatedDatas.get(i).neg.equals("no") ^ sentenceInfo_input.neg.equals("no"))) { // true~~~~~
-								if (result_flag != 1) {
-									selectedDatas.clear();
-									relatedData_array.clear();
-								}
-								result_flag = 1;
-								selectedDatas.add(relatedDatas.get(i));
-								JSONObject jsonObject = new JSONObject();
-								jsonObject.put("sentence", relatedDatas.get(i).sentence);
-								jsonObject.put("link", relatedDatas.get(i).link);
-								relatedData_array.add(jsonObject);
-							} else { // 부정(neg)에 걸림!!
-								result_flag = 2;
-								selectedDatas.add(relatedDatas.get(i));
-								JSONObject jsonObject = new JSONObject();
-								jsonObject.put("sentence", relatedDatas.get(i).sentence);
-								jsonObject.put("link", relatedDatas.get(i).link);
-								relatedData_array.add(jsonObject);
-							}
-						} else { // 하나라도 다름!
-							if (result_flag != 1) {
-								result_flag = 2;
-								selectedDatas.add(relatedDatas.get(i));
-								JSONObject jsonObject = new JSONObject();
-								jsonObject.put("sentence", relatedDatas.get(i).sentence);
-								jsonObject.put("link", relatedDatas.get(i).link);
-								relatedData_array.add(jsonObject);
-							}
-						}
-					} else { // 부사어 다름
-						if (result_flag != 1) {
-							boolean continue_flag = true;
-							if (!relatedDatas.get(i).tmp.equals("null") && !sentenceInfo_input.tmp.equals("null")) { // 시간
-																														// 비교
-								if (!relatedDatas.get(i).tmp.equals(sentenceInfo_input.tmp)) { // 시간 다름
-									continue_flag = false;
-								}
-							}
-							if (continue_flag && !relatedDatas.get(i).location.equals("null")
-									&& !sentenceInfo_input.location.equals("null")) {
-								if (!relatedDatas.get(i).location.equals(sentenceInfo_input.location)) { // 장소 다름
-									continue_flag = false;
-								}
-							}
-							if (continue_flag && !relatedDatas.get(i).adv.equals("null")
-									&& !sentenceInfo_input.adv.equals("null")) {
-								if (!relatedDatas.get(i).adv.equals(sentenceInfo_input.adv)) { // 부사어 다름
-									continue_flag = false;
-								}
-							}
-							if (continue_flag) { // 나머지 다 똑같!
-								if (!(relatedDatas.get(i).neg.equals("no") ^ sentenceInfo_input.neg.equals("no"))) { // false
-									result_flag = 2;
-									selectedDatas.add(relatedDatas.get(i));
-									JSONObject jsonObject = new JSONObject();
-									jsonObject.put("sentence", relatedDatas.get(i).sentence);
-									jsonObject.put("link", relatedDatas.get(i).link);
-									relatedData_array.add(jsonObject);
-								}
-							}
-						}
-					}
-				}
-			}
-		} else { // 목적어, 보어, 부사어 없음!
+		for (int i = 0; i < relatedDatas.size(); i++) {
+			int count_diff = 0;
+			boolean flag_sameComponent = true, flag_objOrCmp_same = true;
+			SentenceInfo cmpData = relatedDatas.get(i);
 
+			if (!sentenceInfo_input.obj.equals("null")) {
+				if (!cmpData.obj.equals("null")) { // 목적어 비교
+					if (!sentenceInfo_input.obj.equals(cmpData.obj)) { // 다르면
+						flag_objOrCmp_same = false;
+					}
+				} else {
+					continue;
+				}
+			} else if (!sentenceInfo_input.cmp.equals("null")) {
+				if (!cmpData.cmp.equals("null")) { // 보어 비교
+					if (!sentenceInfo_input.cmp.equals(cmpData.cmp)) { // 다르면
+						flag_objOrCmp_same = false;
+					}
+				} else {
+					continue;
+				}
+			}
+
+			String[] input_advTmpLoc = { sentenceInfo_input.adv, sentenceInfo_input.tmp, sentenceInfo_input.location };
+			String[] cmp_advTmpLoc = { cmpData.adv, cmpData.tmp, cmpData.location };
+			for (int j = 0; j < 3; j++) {
+				if (!input_advTmpLoc[j].equals("null")) {
+					if (!cmp_advTmpLoc[j].equals("null")) {
+						if (j == 0) {
+							if (!cmp_advTmpLoc[j].contains(input_advTmpLoc[j])) {
+								count_diff++;
+							}
+						} else {
+							if (!input_advTmpLoc[j].equals(cmp_advTmpLoc[j])) {
+								count_diff++;
+							}
+						}
+					} else {
+						flag_sameComponent = false;
+					}
+				} else {
+					if (!cmp_advTmpLoc[j].equals("null")) {
+						flag_sameComponent = false;
+					}
+				}
+			}
+			
+			/*
+			* 0. 가짜뉴스가 아닙니다: 문장의 성분 구조가 같고 문장 성분들이 모두 같을 경우(neg는 일치)
+			* 1. 가짜뉴스가 아닐 확률이 높습니다: 문장의 성분 구조가 다르고 input의 문장 성분들이 모두 맞을 경우(neg는 일치)
+			* 2. 가짜뉴스입니다: 문장의 성분 구조가 같고 목적어나 보어가 같고 다른 요소들이 하나만 달라도!(neg 일치) / 문장의 성분 구조가 같고 문장 성분들이 모두 같고 neg가 불일치
+			* 3. 가짜뉴스일 확률이 높습니다: 문장의 성분 구조가 다르고 input의 문장 성분 중 하나만 달라도(neg 일치) / 문장의 성분 구조가 다르고 문장 성분들이 모두 같고 neg가 불일치
+			* 4. 판단유보: 관련데이터가 없을 때
+			 */
+			for(int j=0; j<5; j++) {
+				result_array[j] = new JSONArray();
+			}
+			
+			if(flag_sameComponent) {	// 문장 성분 구조 같음
+				if(flag_objOrCmp_same) {
+					if(count_diff == 0) {	// 성분들이 모두 일치
+						if (!(cmpData.neg.equals("no") ^ sentenceInfo_input.neg.equals("no"))) { // neg 일치
+							if(result_flag > 0) {
+								result_flag = 0;
+							}
+							JSONObject jsonObject = new JSONObject();
+							jsonObject.put("sentence", relatedDatas.get(i).sentence);
+							jsonObject.put("link", relatedDatas.get(i).link);
+							result_array[0].add(jsonObject);
+						} else {	// neg 불일치
+							if(result_flag > 2) {
+								result_flag = 2;
+							}
+							JSONObject jsonObject = new JSONObject();
+							jsonObject.put("sentence", relatedDatas.get(i).sentence);
+							jsonObject.put("link", relatedDatas.get(i).link);
+							result_array[2].add(jsonObject);
+						}
+					} else {	// 성분들이 하나라도 다름
+						if (!(cmpData.neg.equals("no") ^ sentenceInfo_input.neg.equals("no"))) { // neg 일치
+							if(result_flag > 2) {
+								result_flag = 2;
+							}
+							JSONObject jsonObject = new JSONObject();
+							jsonObject.put("sentence", relatedDatas.get(i).sentence);
+							jsonObject.put("link", relatedDatas.get(i).link);
+							result_array[2].add(jsonObject);
+						}
+					}
+				} 
+			} else {	// 문장 성분 구조 다름
+				if(flag_objOrCmp_same && count_diff == 0) {
+					if(count_diff == 0) {	// input의 성분들이 비교 문장과 모두 일치
+						if (!(cmpData.neg.equals("no") ^ sentenceInfo_input.neg.equals("no"))) { // neg 일치
+							if(result_flag > 1) {
+								result_flag = 1;
+							}
+							JSONObject jsonObject = new JSONObject();
+							jsonObject.put("sentence", relatedDatas.get(i).sentence);
+							jsonObject.put("link", relatedDatas.get(i).link);
+							result_array[1].add(jsonObject);
+						} else {	// neg 불일치
+							if(result_flag > 3) {
+								result_flag = 3;
+							}
+							JSONObject jsonObject = new JSONObject();
+							jsonObject.put("sentence", relatedDatas.get(i).sentence);
+							jsonObject.put("link", relatedDatas.get(i).link);
+							result_array[3].add(jsonObject);
+						}
+					} else {	// 성분들이 하나라도 다름
+						if (!(cmpData.neg.equals("no") ^ sentenceInfo_input.neg.equals("no"))) { // neg 일치
+							if(result_flag > 3) {
+								result_flag = 3;
+							}
+							JSONObject jsonObject = new JSONObject();
+							jsonObject.put("sentence", relatedDatas.get(i).sentence);
+							jsonObject.put("link", relatedDatas.get(i).link);
+							result_array[3].add(jsonObject);
+						}
+					}
+				}
+			}
 		}
 
-		// 결과 show(); 해줘야돼
-		if (result_flag == 0) {
-			System.out.println("판단 유보!");
-			result = new Result(relatedData_array, "판단 유보");
-		} else {
-			if (result_flag == 1) {
-				System.out.println("사실!");
-				result = new Result(relatedData_array, "사실");
-			} else { // result == 2
-				System.out.println("가짜뉴스입니다!");
-				result = new Result(relatedData_array, "가짜뉴스!");
-			}
-			System.out.println("***** 비교에 사용된 데이터 *****");
-			for (int i = 0; i < selectedDatas.size(); i++) {
-				System.out.println("비교문장" + (i + 1) + ") " + selectedDatas.get(i).sentence);
-			}
+		// 결과 show()
+		System.out.println(result.result_string[result_flag]);
+		relatedData_array = result_array[result_flag];
+		result = new Result(relatedData_array, result.result_string[result_flag]);
+		System.out.println("***** 비교에 사용된 데이터 *****");
+		for (int i = 0; i < selectedDatas.size(); i++) {
+			System.out.println("비교문장" + (i + 1) + ") " + selectedDatas.get(i).sentence);
 		}
 		return result;
 	}

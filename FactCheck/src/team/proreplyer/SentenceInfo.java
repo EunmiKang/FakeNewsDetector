@@ -29,7 +29,7 @@ public class SentenceInfo {
 		this.adv = adv;
 		this.cmp = cmp;
 		this.sentence = sentence;
-		this.link=link;
+		this.link = link;
 	}
 	
 	public void setLink(String link) {
@@ -50,7 +50,6 @@ public class SentenceInfo {
 		String neg = "no"; 
 		String adv = "null";
 		String cmp = "null";
-		String link ="null";
 		
 		for(Object word : argument){
 			JSONObject temp = (JSONObject) word;
