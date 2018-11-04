@@ -5,6 +5,12 @@ import java.util.ArrayList;
 
 import org.json.simple.JSONArray;
 
+import team.proreplyer.Discriminator;
+import team.proreplyer.NLProcessor;
+import team.proreplyer.Result;
+import team.proreplyer.SentenceInfo;
+import team.proreplyer.DBManager;
+
 public class DataProcessor {
 	boolean collectFlag = false;
 
@@ -51,4 +57,5 @@ public class DataProcessor {
 		return compareDatas;
 	}
 
+>>>>>>> 09ca69015ae309e57c60a86835733c5dc8915408
 }
