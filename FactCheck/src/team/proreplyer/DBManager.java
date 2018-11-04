@@ -1,4 +1,4 @@
-package team.proreplyer;
+package src.team.proreplyer;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

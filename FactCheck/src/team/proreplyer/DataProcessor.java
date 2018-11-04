@@ -1,9 +1,15 @@
-package team.proreplyer;
+package src.team.proreplyer;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.json.simple.JSONArray;
+
+import team.proreplyer.Discriminator;
+import team.proreplyer.NLProcessor;
+import team.proreplyer.Result;
+import team.proreplyer.SentenceInfo;
+import team.proreplyer.DBManager;
 
 public class DataProcessor {
 	boolean collectFlag = false;
