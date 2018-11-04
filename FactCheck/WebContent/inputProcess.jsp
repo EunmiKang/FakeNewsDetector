@@ -28,11 +28,18 @@
 			<input type="hidden" name="input" value="<%=input %>">
 			<input type="hidden" name="result" value="<%=result_probability %>">
 			<%
-			for(int i=0; i<result_related_link.length; i++) {
+			if(result_related_link.length == 0) {
 			%>
-			<input type="hidden" name="related_sentence" value="<%=result_related_sentence[i] %>">
-			<input type="hidden" name="related_link" value="<%=result_related_link[i] %>">
+			<input type="hidden" name="related_sentence" value="">
+			<input type="hidden" name="related_link" value="">
 			<%
+			} else {
+				for(int i=0; i<result_related_link.length; i++) {
+				%>
+				<input type="hidden" name="related_sentence" value="<%=result_related_sentence[i] %>">
+				<input type="hidden" name="related_link" value="<%=result_related_link[i] %>">
+				<%
+				}
 			}
 			%>
 		</form>
