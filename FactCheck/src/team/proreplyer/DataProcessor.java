@@ -1,4 +1,4 @@
-package src.team.proreplyer;
+package team.proreplyer;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
