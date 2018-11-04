@@ -4,7 +4,8 @@ import org.json.simple.JSONArray;
 
 public class Result {
 	public JSONArray relatedData_array = new JSONArray();
-	public String result = "";
+	public String result;
+	public String[] result_string = {"가짜뉴스가 아닙니다!", "가짜뉴스가 아닐 확률이 높습니다!", "가짜뉴스입니다!", "가짜뉴스일 확률이 높습니다!", "판단 유보"};
 	
 	public Result() {
 		
