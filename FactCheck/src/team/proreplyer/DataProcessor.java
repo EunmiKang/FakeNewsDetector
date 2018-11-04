@@ -1,15 +1,9 @@
-package src.team.proreplyer;
+package team.proreplyer;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.json.simple.JSONArray;
-
-import team.proreplyer.Discriminator;
-import team.proreplyer.NLProcessor;
-import team.proreplyer.Result;
-import team.proreplyer.SentenceInfo;
-import team.proreplyer.DBManager;
 
 public class DataProcessor {
 	boolean collectFlag = false;
@@ -24,18 +18,23 @@ public class DataProcessor {
 		JSONArray NLP_input = new NLProcessor().NLP(input);
 		System.out.println(NLP_input);
 		SentenceInfo sentenceInfo_object = new SentenceInfo().NLPtoSentenceInfo(input, NLP_input);
-		System.out.println(sentenceInfo_object.sbj + " / " + sentenceInfo_object.obj + " / " + sentenceInfo_object.verb);
-
-		ArrayList<SentenceInfo> relatedDatas = getCompareData(sentenceInfo_object.sbj, sentenceInfo_object.verb);
-		
-		System.out.println();
-		System.out.println("@@@ [" + input + "]에 대한 사실 여부 판단 중....");
-		if (relatedDatas.size() == 0) { // 판단유보
-			System.out.println("관련 데이터가 없어요.ㅠㅠ 판단 유보!");
-			return new Result(null, "판단 유보");
+		if (sentenceInfo_object == null) {
+			return new Result(new JSONArray(), "최소한 주어, 동사는 포함되는 문장을 입력해주세요ㅠㅠ");
 		} else {
-			Result result = new Discriminator().judgeTruth(input, sentenceInfo_object, relatedDatas);
-			return result;
+			System.out.println(
+					sentenceInfo_object.sbj + " / " + sentenceInfo_object.obj + " / " + sentenceInfo_object.verb);
+
+			ArrayList<SentenceInfo> relatedDatas = getCompareData(sentenceInfo_object.sbj, sentenceInfo_object.verb);
+
+			System.out.println();
+			System.out.println("@@@ [" + input + "]에 대한 사실 여부 판단 중....");
+			if (relatedDatas.size() == 0) { // 판단유보
+				System.out.println("관련 데이터가 없어요.ㅠㅠ 판단 유보!");
+				return new Result(new JSONArray(), "판단 유보 : 관련 데이터가 없습니다ㅠㅠ");
+			} else {
+				Result result = new Discriminator().judgeTruth(input, sentenceInfo_object, relatedDatas);
+				return result;
+			}
 		}
 	}
 
