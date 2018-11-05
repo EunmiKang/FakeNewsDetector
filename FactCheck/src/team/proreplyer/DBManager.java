@@ -105,4 +105,3 @@ public class DBManager {
 	}
 
 }
->>>>>>> 09ca69015ae309e57c60a86835733c5dc8915408
