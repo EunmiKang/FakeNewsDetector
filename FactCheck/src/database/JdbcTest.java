@@ -19,7 +19,7 @@ public class JdbcTest {
 		System.out.println();
 		try{
 			Class.forName("com.mysql.cj.jdbc.Driver");
-			Connection conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/factcheck?characterEncoding=UTF-8&serverTimezone=UTC", "root", "");
+			Connection conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/factcheck?characterEncoding=UTF-8&serverTimezone=UTC", "[아이디]", "[비밀번호]");
 			System.out.println("Success : "+conn.toString());
 			
 			NLProcessor nlp_Object = new NLProcessor();
