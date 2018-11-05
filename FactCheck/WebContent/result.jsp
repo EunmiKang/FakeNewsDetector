@@ -17,7 +17,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>사실 확인을 해보아요</title>
-	<link rel="stylesheet" type="text/css" href="Main.css?ver=2"/>
+	<link rel="stylesheet" type="text/css" href="Main.css?ver=1"/>
 </head>
 <body>
 	<p id="p_title"><span>C</span>heck <span>T</span>he <span>F</span>acts!</p>
@@ -53,7 +53,7 @@
 					}
 			%>
 				<tr>
-					<td class="relatedDatas"><span id="txt_related"><%=related_sentence[i] %></span><span id="span_link"><a href="<%=related_link[i] %>" target="_blank">바로가기</a></span></td>
+					<td class="relatedDatas"><span class="txt_related"><%=related_sentence[i] %></span><span class="span_link"><a href="<%=related_link[i] %>" target="_blank">바로가기</a></span></td>
 				</tr>
 			<%
 				}

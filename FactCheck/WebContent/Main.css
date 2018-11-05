@@ -42,8 +42,7 @@ span {
 }
 
 #p_input, #p_relatedInfo {
-	font-size: 17pt;
-	font-weight: bold;
+	font-size: 20pt;
 }
 
 #p_input:hover , #p_relatedInfo:hover, #div_result:hover {
@@ -72,7 +71,7 @@ table {
 	border: 0px;
 	padding: 10px;
 	font-family: 'Hanna', serif;
-	font-size: 15pt;
+	font-size: 17pt;
 }
 
 #btn_input {
@@ -100,17 +99,21 @@ table {
 /******************************** right ********************************/
 
 #div_relatedArea {
-	height: 400px;
+	height: 380px;
 	padding: 20px;
 }
 
-#txt_related {
+.txt_related {
 	background-color: #ccccff;
-	font-size: 15pt;
+	font-size: 17pt;
 }
 
-#span_link {
+.span_link {
 	background-color: #ccccff;
 	font-size: 10pt;
 	margin-left: 5px;
+}
+
+.relatedDatas {
+	padding: 5px 0px;
 }
