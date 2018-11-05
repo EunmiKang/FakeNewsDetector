@@ -17,13 +17,17 @@ public class Discriminator {
 	
 	@SuppressWarnings("unchecked")
 	public Result judgeTruth(String input, SentenceInfo sentenceInfo_input, ArrayList<SentenceInfo> relatedDatas) {
-		int result_flag = 4; // 0:가짜뉴스가 아닙니다, 1:가짜뉴스가 아닐 확률이 높습니다, 2:가짜뉴스입니다, 3:가짜뉴스일 확률이 높습니다, 4:판단유보(관련데이터가 없을때)
+		int result_flag = 4; // 0:가짜뉴스가 아닙니다, 1:가짜뉴스가 아닐 확률이 높습니다, 2:가짜뉴스입니다, 3:가짜뉴스일 확률이 높습니다, 4:판단유보(관련데이터가 없을 때)
 		Result result = new Result();
 		JSONArray relatedData_array = new JSONArray();
 		JSONArray[] result_array = new JSONArray[5];
 		ArrayList<SentenceInfo> selectedDatas = new ArrayList<>();
 		String[] postpositions_adv = { "에게", "에", "에서", "에게서", "한테", "으로", "로", "와", "과", "보다", "이", "가" }; // 부사격 조사
 		String[] postpositions_cmp = { "이", "가" }; // 보격 조사
+
+		for (int j = 0; j < 5; j++) {
+			result_array[j] = new JSONArray();
+		}
 
 		/* 부사어, 보어에서 조사 제거 */
 		String input_adv = sentenceInfo_input.adv;
@@ -82,11 +86,15 @@ public class Discriminator {
 				if (!input_advTmpLoc[j].equals("null")) {
 					if (!cmp_advTmpLoc[j].equals("null")) {
 						if (j == 0) {
-							if (!cmp_advTmpLoc[j].contains(input_advTmpLoc[j])) {
-								count_diff++;
+							if (!input_advTmpLoc[1].contains(input_advTmpLoc[0]) && !input_advTmpLoc[2].contains(input_advTmpLoc[0])) {
+								if (!cmp_advTmpLoc[j].contains(input_advTmpLoc[j])) {	// 부사어 비교
+									count_diff++;
+								}
+							} else {
+								
 							}
 						} else {
-							if (!input_advTmpLoc[j].equals(cmp_advTmpLoc[j])) {
+							if (!input_advTmpLoc[j].equals(cmp_advTmpLoc[j])) {	// 시간, 위치 비교
 								count_diff++;
 							}
 						}
@@ -99,31 +107,27 @@ public class Discriminator {
 					}
 				}
 			}
-			
+
 			/*
-			* 0. 가짜뉴스가 아닙니다: 문장의 성분 구조가 같고 문장 성분들이 모두 같을 경우(neg는 일치)
-			* 1. 가짜뉴스가 아닐 확률이 높습니다: 문장의 성분 구조가 다르고 input의 문장 성분들이 모두 맞을 경우(neg는 일치)
-			* 2. 가짜뉴스입니다: 문장의 성분 구조가 같고 목적어나 보어가 같고 다른 요소들이 하나만 달라도!(neg 일치) / 문장의 성분 구조가 같고 문장 성분들이 모두 같고 neg가 불일치
-			* 3. 가짜뉴스일 확률이 높습니다: 문장의 성분 구조가 다르고 input의 문장 성분 중 하나만 달라도(neg 일치) / 문장의 성분 구조가 다르고 문장 성분들이 모두 같고 neg가 불일치
-			* 4. 판단유보: 관련데이터가 없을 때
+			 * 0. 가짜뉴스가 아닙니다: 문장의 성분 구조가 같고 문장 성분들이 모두 같을 경우(neg는 일치) 
+			 * 1. 가짜뉴스가 아닐 확률이 높습니다: 문장의 성분 구조가 다르고 input의 문장 성분들이 모두 맞을 경우(neg는 일치) 
+			 * 2. 가짜뉴스입니다: 문장의 성분 구조가 같고 목적어나 보어가 같고 다른 요소들이 하나만 달라도!(neg 일치) / 문장의 성분 구조가 같고 문장 성분들이 모두 같고 neg가 불일치
+			 * 3. 가짜뉴스일 확률이 높습니다: 문장의 성분 구조가 다르고 input의 문장 성분 중 하나만 다른 경우 / 문장의 성분 구조가 다르고 문장 성분들이 모두 같고 neg가 불일치 
+			 * 4. 판단유보: 관련데이터가 없을 때
 			 */
-			for(int j=0; j<5; j++) {
-				result_array[j] = new JSONArray();
-			}
-			
-			if(flag_sameComponent) {	// 문장 성분 구조 같음
-				if(flag_objOrCmp_same) {
-					if(count_diff == 0) {	// 성분들이 모두 일치
+			if (flag_sameComponent) { // 문장 성분 구조 같음
+				if (flag_objOrCmp_same) {
+					if (count_diff == 0) { // 성분들이 모두 일치
 						if (!(cmpData.neg.equals("no") ^ sentenceInfo_input.neg.equals("no"))) { // neg 일치
-							if(result_flag > 0) {
+							if (result_flag > 0) {
 								result_flag = 0;
 							}
 							JSONObject jsonObject = new JSONObject();
 							jsonObject.put("sentence", relatedDatas.get(i).sentence);
 							jsonObject.put("link", relatedDatas.get(i).link);
 							result_array[0].add(jsonObject);
-						} else {	// neg 불일치
-							if(result_flag > 2) {
+						} else { // neg 불일치
+							if (result_flag > 2) {
 								result_flag = 2;
 							}
 							JSONObject jsonObject = new JSONObject();
@@ -131,9 +135,9 @@ public class Discriminator {
 							jsonObject.put("link", relatedDatas.get(i).link);
 							result_array[2].add(jsonObject);
 						}
-					} else {	// 성분들이 하나라도 다름
+					} else { // 성분들이 하나라도 다름
 						if (!(cmpData.neg.equals("no") ^ sentenceInfo_input.neg.equals("no"))) { // neg 일치
-							if(result_flag > 2) {
+							if (result_flag > 2) {
 								result_flag = 2;
 							}
 							JSONObject jsonObject = new JSONObject();
@@ -142,20 +146,21 @@ public class Discriminator {
 							result_array[2].add(jsonObject);
 						}
 					}
-				} 
-			} else {	// 문장 성분 구조 다름
-				if(flag_objOrCmp_same && count_diff == 0) {
-					if(count_diff == 0) {	// input의 성분들이 비교 문장과 모두 일치
+				}
+			} else { // 문장 성분 구조 다름
+				if (flag_objOrCmp_same) {
+					if (count_diff == 0) { // input의 성분들이 비교 문장과 모두 일치
+						System.out.println("hello");
 						if (!(cmpData.neg.equals("no") ^ sentenceInfo_input.neg.equals("no"))) { // neg 일치
-							if(result_flag > 1) {
+							if (result_flag > 1) {
 								result_flag = 1;
 							}
 							JSONObject jsonObject = new JSONObject();
 							jsonObject.put("sentence", relatedDatas.get(i).sentence);
 							jsonObject.put("link", relatedDatas.get(i).link);
 							result_array[1].add(jsonObject);
-						} else {	// neg 불일치
-							if(result_flag > 3) {
+						} else { // neg 불일치
+							if (result_flag > 3) {
 								result_flag = 3;
 							}
 							JSONObject jsonObject = new JSONObject();
@@ -163,9 +168,9 @@ public class Discriminator {
 							jsonObject.put("link", relatedDatas.get(i).link);
 							result_array[3].add(jsonObject);
 						}
-					} else {	// 성분들이 하나라도 다름
+					} else { // 성분들이 하나라도 다름
 						if (!(cmpData.neg.equals("no") ^ sentenceInfo_input.neg.equals("no"))) { // neg 일치
-							if(result_flag > 3) {
+							if (result_flag > 3) {
 								result_flag = 3;
 							}
 							JSONObject jsonObject = new JSONObject();
@@ -179,7 +184,6 @@ public class Discriminator {
 		}
 
 		// 결과 show()
-		System.out.println(result.result_string[result_flag]);
 		relatedData_array = result_array[result_flag];
 		result = new Result(relatedData_array, result.result_string[result_flag]);
 		System.out.println("***** 비교에 사용된 데이터 *****");
