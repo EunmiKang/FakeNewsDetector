@@ -11,3 +11,5 @@
 ### 개발 툴
 * Eclipse
 --------------------------------------------------------
+### 포스터
+<img src="https://user-images.githubusercontent.com/18115456/48249533-c04a4c00-e43e-11e8-8d79-17adea15b1f6.jpg"/>
