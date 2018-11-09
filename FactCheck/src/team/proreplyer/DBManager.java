@@ -91,17 +91,4 @@ public class DBManager {
 	      }
 	      return null;
 	   }
-
-
-	public static void main(String[] args) {
-		DBManager dbManager = new DBManager();
-		dbManager.connectDB();
-		NLProcessor NLPObject = new NLProcessor();
-		Discriminator discriminator = new Discriminator();
-		//discriminator.judgeTruth(input, sentenceInfo_input, relatedDatas);
-		discriminator.convertDate("내년");
-		//insertToDB("최근 한달간 한국콜마의 상장주식수 대비 거래량을 비교해보니 일별 매매회전율이 0.65%로 집계됐다.", "test","2018-08-01");
-		
-	}
-
 }
