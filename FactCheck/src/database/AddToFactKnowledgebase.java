@@ -52,9 +52,6 @@ public class JdbcTest {
 			System.out.println("verb : " + sentenceInfo_object.verb);
 			System.out.println("sentence : " + sentenceInfo_object.sentence);
 
-			
-			
-			
 			/* DB에 삽입 */
 			int sbj_no = 0;
 			int tmp_no = 0;
