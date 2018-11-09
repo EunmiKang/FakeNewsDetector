@@ -20,41 +20,44 @@ public class Discriminator {
 		int result_flag = 4; // 0:가짜뉴스가 아닙니다, 1:가짜뉴스가 아닐 확률이 높습니다, 2:가짜뉴스입니다, 3:가짜뉴스일 확률이 높습니다, 4:판단유보(관련데이터가 없을 때)
 		Result result = new Result();
 		JSONArray relatedData_array = new JSONArray();
-		JSONArray[] result_array = new JSONArray[5];
+		JSONArray[] result_array2 = new JSONArray[2];
 		ArrayList<SentenceInfo> selectedDatas = new ArrayList<>();
 		String[] postpositions_adv = { "에게", "에", "에서", "에게서", "한테", "으로", "로", "와", "과", "보다", "이", "가" }; // 부사격 조사
 		String[] postpositions_cmp = { "이", "가" }; // 보격 조사
 
-		for (int j = 0; j < 5; j++) {
-			result_array[j] = new JSONArray();
+		for (int j = 0; j < 2; j++) {
+			result_array2[j] = new JSONArray();
 		}
 
 		/* 부사어, 보어에서 조사 제거 */
 		String input_adv = sentenceInfo_input.adv;
 		if (!input_adv.equals("null")) {
 			for (int i = 0; i < postpositions_adv.length; i++) {
-				String input_postposition = input_adv.substring(input_adv.length() - postpositions_adv[i].length());
-				if (input_postposition.equals(postpositions_adv[i])) {
-					input_adv = input_adv.substring(0, input_adv.length() - postpositions_adv[i].length());
-					System.out.println("부사어 : " + input_adv);
-					break;
+				if (input_adv.length() >= postpositions_adv[i].length()) {
+					String input_postposition = input_adv.substring(input_adv.length() - postpositions_adv[i].length());
+					if (input_postposition.equals(postpositions_adv[i])) {
+						input_adv = input_adv.substring(0, input_adv.length() - postpositions_adv[i].length());
+						System.out.println("부사어 : " + input_adv);
+						break;
+					}
 				}
 			}
 		}
 		String input_cmp = sentenceInfo_input.cmp;
 		if (!input_cmp.equals("null")) {
 			for (int i = 0; i < postpositions_cmp.length; i++) {
-				String input_postposition = input_cmp.substring(input_cmp.length() - postpositions_cmp[i].length());
-				if (input_postposition.equals(postpositions_cmp[i])) {
-					input_cmp = input_cmp.substring(0, input_cmp.length() - postpositions_cmp[i].length());
-					System.out.println("보어 : " + input_cmp);
-					break;
+				if (input_cmp.length() >= postpositions_cmp[i].length()) {
+					String input_postposition = input_cmp.substring(input_cmp.length() - postpositions_cmp[i].length());
+					if (input_postposition.equals(postpositions_cmp[i])) {
+						input_cmp = input_cmp.substring(0, input_cmp.length() - postpositions_cmp[i].length());
+						System.out.println("보어 : " + input_cmp);
+						break;
+					}
 				}
 			}
 		}
 
 		convertDate(sentenceInfo_input.tmp);
-		System.out.println("지현이가 한 날짜 변환 과연 !\n" + sentenceInfo_input.tmp);
 
 		/* 관련 문장들과 비교 */
 		for (int i = 0; i < relatedDatas.size(); i++) {
@@ -86,15 +89,14 @@ public class Discriminator {
 				if (!input_advTmpLoc[j].equals("null")) {
 					if (!cmp_advTmpLoc[j].equals("null")) {
 						if (j == 0) {
-							if (!input_advTmpLoc[1].contains(input_advTmpLoc[0]) && !input_advTmpLoc[2].contains(input_advTmpLoc[0])) {
-								if (!cmp_advTmpLoc[j].contains(input_advTmpLoc[j])) {	// 부사어 비교
+							if (!input_advTmpLoc[1].contains(input_advTmpLoc[0])
+									&& !input_advTmpLoc[2].contains(input_advTmpLoc[0])) {
+								if (!cmp_advTmpLoc[j].contains(input_advTmpLoc[j])) { // 부사어 비교
 									count_diff++;
 								}
-							} else {
-								
 							}
 						} else {
-							if (!input_advTmpLoc[j].equals(cmp_advTmpLoc[j])) {	// 시간, 위치 비교
+							if (!(cmp_advTmpLoc[j]).contains(input_advTmpLoc[j])) { // 시간, 위치 비교
 								count_diff++;
 							}
 						}
@@ -125,7 +127,7 @@ public class Discriminator {
 							JSONObject jsonObject = new JSONObject();
 							jsonObject.put("sentence", relatedDatas.get(i).sentence);
 							jsonObject.put("link", relatedDatas.get(i).link);
-							result_array[0].add(jsonObject);
+							result_array2[0].add(jsonObject);
 						} else { // neg 불일치
 							if (result_flag > 2) {
 								result_flag = 2;
@@ -133,7 +135,7 @@ public class Discriminator {
 							JSONObject jsonObject = new JSONObject();
 							jsonObject.put("sentence", relatedDatas.get(i).sentence);
 							jsonObject.put("link", relatedDatas.get(i).link);
-							result_array[2].add(jsonObject);
+							result_array2[1].add(jsonObject);
 						}
 					} else { // 성분들이 하나라도 다름
 						if (!(cmpData.neg.equals("no") ^ sentenceInfo_input.neg.equals("no"))) { // neg 일치
@@ -143,14 +145,13 @@ public class Discriminator {
 							JSONObject jsonObject = new JSONObject();
 							jsonObject.put("sentence", relatedDatas.get(i).sentence);
 							jsonObject.put("link", relatedDatas.get(i).link);
-							result_array[2].add(jsonObject);
+							result_array2[1].add(jsonObject);
 						}
 					}
 				}
 			} else { // 문장 성분 구조 다름
 				if (flag_objOrCmp_same) {
 					if (count_diff == 0) { // input의 성분들이 비교 문장과 모두 일치
-						System.out.println("hello");
 						if (!(cmpData.neg.equals("no") ^ sentenceInfo_input.neg.equals("no"))) { // neg 일치
 							if (result_flag > 1) {
 								result_flag = 1;
@@ -158,7 +159,7 @@ public class Discriminator {
 							JSONObject jsonObject = new JSONObject();
 							jsonObject.put("sentence", relatedDatas.get(i).sentence);
 							jsonObject.put("link", relatedDatas.get(i).link);
-							result_array[1].add(jsonObject);
+							result_array2[0].add(jsonObject);
 						} else { // neg 불일치
 							if (result_flag > 3) {
 								result_flag = 3;
@@ -166,7 +167,7 @@ public class Discriminator {
 							JSONObject jsonObject = new JSONObject();
 							jsonObject.put("sentence", relatedDatas.get(i).sentence);
 							jsonObject.put("link", relatedDatas.get(i).link);
-							result_array[3].add(jsonObject);
+							result_array2[1].add(jsonObject);
 						}
 					} else { // 성분들이 하나라도 다름
 						if (!(cmpData.neg.equals("no") ^ sentenceInfo_input.neg.equals("no"))) { // neg 일치
@@ -176,7 +177,7 @@ public class Discriminator {
 							JSONObject jsonObject = new JSONObject();
 							jsonObject.put("sentence", relatedDatas.get(i).sentence);
 							jsonObject.put("link", relatedDatas.get(i).link);
-							result_array[3].add(jsonObject);
+							result_array2[1].add(jsonObject);
 						}
 					}
 				}
@@ -184,8 +185,15 @@ public class Discriminator {
 		}
 
 		// 결과 show()
-		relatedData_array = result_array[result_flag];
+		if(result_flag == 0 || result_flag == 1) {
+			relatedData_array = result_array2[0];
+		} else if(result_flag == 2 || result_flag == 3) {
+			relatedData_array = result_array2[1];
+		} else {
+			relatedData_array = new JSONArray();
+		}
 		result = new Result(relatedData_array, result.result_string[result_flag]);
+		result.setResultFlag(result_flag);
 		System.out.println("***** 비교에 사용된 데이터 *****");
 		for (int i = 0; i < selectedDatas.size(); i++) {
 			System.out.println("비교문장" + (i + 1) + ") " + selectedDatas.get(i).sentence);
@@ -194,8 +202,7 @@ public class Discriminator {
 	}
 
 	public String convertDate(String tmp) {
-		
-		int year, month;
+		int year;
 		Calendar cal = Calendar.getInstance ( );
 		Date today = new Date();
 		Date tomorrow = new Date(today.getTime() + (long) (1000 * 60 * 60 * 24));
